@@ -65,7 +65,10 @@ Handshaking.prototype.parse = function parse(data, fn) {
   unshift.store.removeItem(prefix +':id');
 
   if ('error' in data) return fn.call(unshift, new Error(data.error)), unshift;
-  if ('id' in data) unshift.store.setItem(prefix +':id', data.id);
+  if ('id' in data) {
+    unshift.id = data.id;
+    unshift.store.setItem(prefix +':id', data.id);
+  }
 
   fn.call(unshift, undefined, data);
 
