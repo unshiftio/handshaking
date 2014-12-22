@@ -1,3 +1,4 @@
+/* istanbul ignore next */
 describe('handshaking', function () {
   'use strict';
 
@@ -47,6 +48,35 @@ describe('handshaking', function () {
       shake.parse('version=1&bool=false', parser);
       shake.parse('version=0&bool=true', parser);
       shake.parse('version=0&bool=0', parser);
+    });
+
+    it('calls the completion callback on parse error', function (next) {
+      shake.destroy();
+      shake = new Handshake(context, { parse: JSON.parse });
+
+      shake.parse({}, function (err, data) {
+        assume(err).is.instanceOf(Error);
+
+        next();
+      });
+    });
+
+    it('calls with error when theres an error property', function (next) {
+      shake.parse('error=shit', function (err) {
+        assume(err).is.instanceOf(Error);
+        assume(err.message).equals('shit');
+
+        next();
+      });
+    });
+
+    it('saves the id when we receive an id', function (next) {
+      shake.parse('id=foo', function (err, data) {
+        assume(data.id).equals('foo');
+        assume(shake.id).equals('foo');
+
+        next();
+      });
     });
   });
 
