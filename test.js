@@ -42,6 +42,8 @@ describe('handshaking', function () {
         assume(data.version).is.a('number');
         assume(data.bool).is.a('boolean');
 
+        assume(this).deep.equals(context);
+
         if (!(calls--)) next();
       }
 
@@ -56,6 +58,7 @@ describe('handshaking', function () {
 
       shake.parse({}, function (err, data) {
         assume(err).is.instanceOf(Error);
+        assume(this).deep.equals(context);
 
         next();
       });
@@ -65,6 +68,7 @@ describe('handshaking', function () {
       shake.parse('error=shit', function (err) {
         assume(err).is.instanceOf(Error);
         assume(err.message).equals('shit');
+        assume(this).deep.equals(context);
 
         next();
       });
@@ -73,7 +77,19 @@ describe('handshaking', function () {
     it('saves the id when we receive an id', function (next) {
       shake.parse('id=foo', function (err, data) {
         assume(data.id).equals('foo');
-        assume(shake.id).equals('foo');
+        assume(shake.data.id).equals('foo');
+
+        next();
+      });
+    });
+  });
+
+  describe('#get', function () {
+    it('retrieves the data which was storred in the handshake', function (next) {
+      shake.parse('foo=bar&bar=foo', function () {
+        assume(shake.get('foo')).equals('bar');
+        assume(shake.get('bar')).equals('foo');
+        assume(shake.get('pez')).equals(undefined);
 
         next();
       });

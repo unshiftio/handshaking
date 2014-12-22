@@ -11,17 +11,27 @@ var has = Object.prototype.hasOwnProperty
  * @api public
  */
 function Handshaking(context, options) {
-  var unshift = this;
+  var unshift = this
+    , prefix
+    , store
+    , sync;
 
   if (!(unshift instanceof Handshaking)) return new Handshaking(context, options);
   options = options || {};
 
-  unshift.store = options.store || Handshaking.store;
-  unshift.prefix = options.prefix || 'unshift';
+  sync   = unshift.sync   = (options.sync || 'id').split(/[\,|\s]+/);
+  store  = unshift.store  = options.store || Handshaking.store;
+  prefix = unshift.prefix = options.prefix || 'unshift';
+
   unshift.parser = options.parse || qs.parse;
+  unshift.context = context || unshift;
 
   unshift.configuration = {};
-  unshift.id = unshift.store.getItem(unshift.prefix +':id');
+  unshift.data = {};
+
+  for (var i = 0; i < sync.length; i++) {
+    unshift.data[sync[i]] = store.getItem(prefix +':'+ sync[i]);
+  }
 }
 
 /**
@@ -39,6 +49,17 @@ Handshaking.prototype.set = function set(key, parser) {
 };
 
 /**
+ * Return the data from a previous handshake.
+ *
+ * @param {String} key The property that should be returned.
+ * @returns {Mixed}
+ * @api public
+ */
+Handshaking.prototype.get = function get(key) {
+  return this.data[key];
+};
+
+/**
  * Parse the data from the handshake.
  *
  * @param {String} data Data that needs to be parsed.
@@ -49,10 +70,12 @@ Handshaking.prototype.set = function set(key, parser) {
 Handshaking.prototype.parse = function parse(data, fn) {
   var key
     , unshift = this
+    , sync = unshift.sync
+    , store = unshift.store
     , prefix = unshift.prefix;
 
   try { data = unshift.parser(data); }
-  catch (e) { return fn.call(unshift, e), unshift; }
+  catch (e) { return fn.call(unshift.context, e), unshift; }
 
   for (key in data) {
     if (!has.call(unshift.configuration, key)) continue;
@@ -64,13 +87,18 @@ Handshaking.prototype.parse = function parse(data, fn) {
   //
   unshift.store.removeItem(prefix +':id');
 
-  if ('error' in data) return fn.call(unshift, new Error(data.error)), unshift;
-  if ('id' in data) {
-    unshift.id = data.id;
-    unshift.store.setItem(prefix +':id', data.id);
+  if ('error' in data) {
+    return fn.call(unshift.context, new Error(data.error)), unshift;
   }
 
-  fn.call(unshift, undefined, data);
+  for (var i = 0; i < sync.length; i++) {
+    if (has.call(data, sync[i])) {
+      store.setItem(prefix +':'+ sync[i], data[sync[i]]);
+    }
+  }
+
+  unshift.data = data;
+  fn.call(unshift.context, undefined, data);
 
   return unshift;
 };
@@ -83,9 +111,15 @@ Handshaking.prototype.parse = function parse(data, fn) {
  * @api public
  */
 Handshaking.prototype.destroy = function destroy() {
-  if (!this.parse) return false;
+  if (!this.parser) return false;
 
-  this.store = this.parse = this.configuration = this.context = null;
+  var nulled = 'store prefix parser configuration context data'.split(' ')
+    , l = nulled.length
+    , i = 0;
+
+  for (; i < l; i++) {
+    this[nulled[i]] = null;
+  }
 
   return true;
 };
