@@ -1,6 +1,6 @@
 {
   "name": "handshaking",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Handshake processing for the unshfit.io client",
   "main": "index.js",
   "scripts": {
