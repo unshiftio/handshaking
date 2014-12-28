@@ -1,7 +1,8 @@
 'use strict';
 
 var has = Object.prototype.hasOwnProperty
-  , qs = require('querystringify');
+  , qs = require('querystringify')
+  , demolish = require('demolish');
 
 /**
  *
@@ -107,22 +108,11 @@ Handshaking.prototype.parse = function parse(data, fn) {
  * Destroy the complete handshaking instance so we can be reclaimed by garbage
  * collection.
  *
+ * @type {Function}
  * @returns {Boolean}
  * @api public
  */
-Handshaking.prototype.destroy = function destroy() {
-  if (!this.parser) return false;
-
-  var nulled = 'store prefix parser configuration context data'.split(' ')
-    , l = nulled.length
-    , i = 0;
-
-  for (; i < l; i++) {
-    this[nulled[i]] = null;
-  }
-
-  return true;
-};
+Handshaking.prototype.destroy = demolish('store prefix parser configuration context data');
 
 /**
  * The storage layer where we need to store the session id in. Ideally this is

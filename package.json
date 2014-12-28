@@ -30,6 +30,7 @@
     "pre-commit": "0.0.x"
   },
   "dependencies": {
+    "demolish": "1.0.x",
     "querystringify": "0.0.x",
     "sessionstorage": "0.0.x"
   }
