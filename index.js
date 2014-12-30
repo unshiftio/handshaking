@@ -2,9 +2,20 @@
 
 var has = Object.prototype.hasOwnProperty
   , qs = require('querystringify')
-  , demolish = require('demolish');
+  , destroy = require('demolish');
 
 /**
+ * Handshake handler.
+ *
+ * Options:
+ *
+ * - `sync` The properties of the handshake that should be synced in the store.
+ *   Defaults to `id`
+ * - `store` Storage system which will hold all the things. Defaults to
+ *   sessionStorage
+ * - `prefix` Prefix for the keys that are stored to prevent possible
+ *   collisions. Defaults to `unshift`
+ * - `parse` First phase response parser function. Defaults to `qs.parse`.
  *
  * @constructor
  * @param {Mixed} context Context for the handshakes
@@ -112,7 +123,7 @@ Handshaking.prototype.parse = function parse(data, fn) {
  * @returns {Boolean}
  * @api public
  */
-Handshaking.prototype.destroy = demolish('store prefix parser configuration context data');
+Handshaking.prototype.destroy = destroy('sync store prefix parse context configuration data');
 
 /**
  * The storage layer where we need to store the session id in. Ideally this is
