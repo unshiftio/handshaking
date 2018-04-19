@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "demolish": "1.0.x",
-    "querystringify": "~1.0.0",
+    "querystringify": "~2.0.0",
     "sessionstorage": "0.0.x"
   }
 }
